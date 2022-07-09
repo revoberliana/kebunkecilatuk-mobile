@@ -10,19 +10,25 @@ use Laravel\Fortify\Rules\Password;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
     public function register(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(),
+            [
                 'name' => ['required','string','max:255'],
                 'username' => ['required', 'string', 'max:25', 'unique:users'],
                 'email' => ['required', 'string', 'email', 'max:25', 'unique:users'],
                 'phone' => ['nullable','string','max:255'],
                 'password' => ['required', 'string', new Password],
             ]);
+
+            if ($validator-> fails()){
+                return response()->json($validator->errors(), 400);
+            }
 
             User::create([
                 'name' => $request->name,
